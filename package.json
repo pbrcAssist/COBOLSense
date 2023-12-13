@@ -1,0 +1,69 @@
+{
+    "name": "cobol-sense",
+    "displayName": "Cobol Sense",
+    "description": "GPT Assistant for COBOL",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.84.0"
+    },
+    "license": "Apache-2.0",
+    "author": "Jomar Dino",
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [{
+                "command": "cobol-sense.cobolSense",
+                "title": "COBOL Sense"
+            },
+            {
+                "command": "cobol-sense.documentCommand",
+                "title": "Document"
+            },
+            {
+                "command": "cobol-sense.generateCommand",
+                "title": "Generate"
+            },
+            {
+                "command": "cobol-sense.optimizeCommand",
+                "title": "Optimize"
+            }
+        ],
+        "submenus": [{
+            "id": "cobol-sense.submenu",
+            "label": "COBOL Sense"
+        }],
+        "menus": {
+            "editor/context": [{
+                "submenu": "cobol-sense.submenu",
+                "group": "navigation"
+            }],
+            "cobol-sense.submenu": [{
+                    "command": "cobol-sense.documentCommand"
+                },
+                {
+                    "command": "cobol-sense.generateCommand"
+                },
+                {
+                    "command": "cobol-sense.optimizeCommand"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "vscode-test"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.84.0",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "18.x",
+        "eslint": "^8.54.0",
+        "typescript": "^5.3.2",
+        "@vscode/test-cli": "^0.0.4",
+        "@vscode/test-electron": "^2.3.8"
+    }
+}
