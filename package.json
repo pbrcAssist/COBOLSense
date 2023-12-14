@@ -2,10 +2,16 @@
     "name": "cobol-sense",
     "displayName": "Cobol Sense",
     "description": "GPT Assistant for COBOL",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.84.0"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cobolsense/COBOLSense.git"
+    },
+    "icon": "icon.png",
+    "publisher": "cobolsense",
     "license": "Apache-2.0",
     "author": "Jomar Dino",
     "categories": [
@@ -52,18 +58,43 @@
             ]
         }
     },
+    "keybindings": [{
+            "command": "cobol-sense.documentCommand",
+            "key": "ctrl+alt+d",
+            "mac": "cmd+alt+d",
+            "when": "editorTextFocus && editorHasSelection"
+        },
+        {
+            "command": "cobol-sense.optimizeCommand",
+            "key": "ctrl+alt+o",
+            "mac": "cmd+alt+o",
+            "when": "editorTextFocus && editorHasSelection"
+        },
+        {
+            "command": "cobol-sense.generateCommand",
+            "key": "ctrl+alt+g",
+            "mac": "cmd+alt+g",
+            "when": "editorTextFocus"
+        }
+    ],
     "scripts": {
         "lint": "eslint .",
         "pretest": "npm run lint",
-        "test": "vscode-test"
+        "test": "vscode-test",
+        "package": "vsce package",
+        "login": "vsce login cobolsense",
+        "publish": "vsce publish"
     },
     "devDependencies": {
-        "@types/vscode": "^1.84.0",
         "@types/mocha": "^10.0.6",
         "@types/node": "18.x",
-        "eslint": "^8.54.0",
-        "typescript": "^5.3.2",
+        "@types/vscode": "^1.84.0",
         "@vscode/test-cli": "^0.0.4",
-        "@vscode/test-electron": "^2.3.8"
+        "@vscode/test-electron": "^2.3.8",
+        "eslint": "^8.54.0",
+        "typescript": "^5.3.2"
+    },
+    "dependencies": {
+        "axios": "^0.24.0"
     }
 }

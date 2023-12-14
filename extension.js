@@ -8,21 +8,11 @@ const outputChannel = vscode.window.createOutputChannel('CobolSense');
 
 function activate(context) {
     let documentCommand = vscode.commands.registerCommand('cobol-sense.documentCommand', async() => {
-        // const response = await vscode.window.showQuickPick(['Add tags on header and footer', 'Add tags per line', 'No'], { placeHolder: 'Do you want to add cobol tags?' });
-
-        // if (response === 'Yes') {
-        //     vscode.window.showInformationMessage('You selected Yes!');
-        // } else if (response === 'No') {
-        //     vscode.window.showInformationMessage('You selected No.');
-        // } else {
-        //     vscode.window.showInformationMessage('You did not make a selection.');
-        // }
-
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: 'Processing...',
-                cancellable: false
+                title: 'Documenting code please wait...',
+                cancellable: true
             }, async(progress) => {
                 const editor = vscode.window.activeTextEditor;
 
@@ -38,9 +28,14 @@ function activate(context) {
 
                 const apiResponse = await callBackendApiForCodeDocumentation(selectedText);
 
+                if (apiResponse.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
+                    vscode.window.showErrorMessage('Error: Unable to connect to the internet. Please check your network connection.');
+                    return;
+                }
+
                 outputChannel.appendLine('\n\nAPI Response for Code Documentation:');
                 outputChannel.appendLine(apiResponse);
-                outputChannel.show();
+                //outputChannel.show();
 
                 const currentDate = new Date();
                 const fileName = `cobol-sense-documentation-${formatDate(currentDate)}.txt`;
@@ -61,14 +56,19 @@ function activate(context) {
                     editBuilder.insert(currentPosition, `\n${apiResponse}`);
                 });
 
-                vscode.window.showInformationMessage('Editor opened, content inserted, and API response appended.');
+                vscode.window.showInformationMessage('Code documentation generated successfully! Opening a new editor with the documentation.');
             });
         } catch (error) {
+            if (error.message.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
+                vscode.window.showErrorMessage('Error: Unable to connect to the internet. Please check your network connection.');
+                return;
+            }
+
             outputChannel.appendLine('\n\nError calling backend API for Code Documentation:');
             outputChannel.appendLine(error.message);
-            outputChannel.show();
+            //outputChannel.show();
 
-            vscode.window.showErrorMessage(`Error calling backend API for Code Documentation: ${error.message}`);
+            vscode.window.showErrorMessage(`Error documenting code: ${error.message}`);
         }
     });
 
@@ -76,8 +76,8 @@ function activate(context) {
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: 'Optimizing Code...',
-                cancellable: false
+                title: 'Optimizing code please wait...',
+                cancellable: true
             }, async(progress) => {
                 const editor = vscode.window.activeTextEditor;
 
@@ -93,9 +93,14 @@ function activate(context) {
 
                 const optimizedCode = await callBackendApiForCodeOptimization(selectedText);
 
+                if (optimizedCode.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
+                    vscode.window.showErrorMessage('Error: Unable to connect to the internet. Please check your network connection.');
+                    return;
+                }
+
                 outputChannel.appendLine('\n\nOptimized Code:');
                 outputChannel.appendLine(optimizedCode);
-                outputChannel.show();
+                //outputChannel.show();
 
                 editor.edit((editBuilder) => {
                     editBuilder.replace(editor.selection, optimizedCode);
@@ -104,9 +109,14 @@ function activate(context) {
                 vscode.window.showInformationMessage('Code optimization complete!');
             });
         } catch (error) {
+            if (error.message.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
+                vscode.window.showErrorMessage('Error: Unable to connect to the internet. Please check your network connection.');
+                return;
+            }
+
             outputChannel.appendLine('\n\nError optimizing code:');
             outputChannel.appendLine(error.message);
-            outputChannel.show();
+            //outputChannel.show();
 
             vscode.window.showErrorMessage(`Error optimizing code: ${error.message}`);
         }
@@ -116,8 +126,8 @@ function activate(context) {
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: 'Generating Code...',
-                cancellable: false
+                title: 'Generating code please wait...',
+                cancellable: true
             }, async(progress) => {
                 const editor = vscode.window.activeTextEditor;
 
@@ -137,9 +147,14 @@ function activate(context) {
 
                 const generatedCode = await callBackendApiForCodeGeneration(userPrompt);
 
+                if (generatedCode.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
+                    vscode.window.showErrorMessage('Error: Unable to connect to the internet. Please check your network connection.');
+                    return;
+                }
+
                 outputChannel.appendLine('\n\nGenerated Code:');
                 outputChannel.appendLine(generatedCode);
-                outputChannel.show();
+                //outputChannel.show();
 
                 const currentPosition = editor.selection.active;
                 editor.edit((editBuilder) => {
@@ -149,9 +164,14 @@ function activate(context) {
                 vscode.window.showInformationMessage('Generated code inserted at the cursor position.');
             });
         } catch (error) {
+            if (error.message.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
+                vscode.window.showErrorMessage('Error: Unable to connect to the internet. Please check your network connection.');
+                return;
+            }
+
             outputChannel.appendLine('\n\nError generating code:');
             outputChannel.appendLine(error.message);
-            outputChannel.show();
+            //outputChannel.show();
 
             vscode.window.showErrorMessage(`Error generating code: ${error.message}`);
         }
@@ -163,7 +183,7 @@ function activate(context) {
 async function callBackendApiForCodeGeneration(prompt) {
     outputChannel.appendLine('\n\nCode Generation Request:');
     outputChannel.appendLine(prompt);
-    outputChannel.show();
+    //outputChannel.show();
 
     const backendApiEndpoint = 'https://cobolsenseapplication.azurewebsites.net/api/CobolGeneration';
 
@@ -175,17 +195,17 @@ async function callBackendApiForCodeGeneration(prompt) {
         .catch((error) => {
             outputChannel.appendLine('\n\nError calling backend API for code generation:');
             outputChannel.appendLine(error.message);
-            outputChannel.show();
+            //outputChannel.show();
 
             // throw new Error('Error generating code: ' + error.message);
-            return '============= Mock response generate code ============';
+            return error.message;
         });
 }
 
 async function callBackendApiForCodeOptimization(codeToOptimize) {
     outputChannel.appendLine('\n\nOptimized Code Request:');
     outputChannel.appendLine(codeToOptimize);
-    outputChannel.show();
+    //outputChannel.show();
 
     const backendApiEndpoint = 'https://cobolsenseapplication.azurewebsites.net/api/cobol-refactor';
 
@@ -195,22 +215,22 @@ async function callBackendApiForCodeOptimization(codeToOptimize) {
 
         outputChannel.appendLine('\n\nFull API Response:');
         outputChannel.appendLine(JSON.stringify(apiResponse, null, 2));
-        outputChannel.show();
+        //outputChannel.show();
         const contentMatches = apiResponse.match(/content=([\s\S]+?)(?=(, name=null, functionCall=null|$))/g);
         const optimizedCode = contentMatches ? contentMatches.map(match => match.replace('content=', '').trim()).join('\n') : 'No optimized code found';
 
         outputChannel.appendLine('\n\nOptimized Code:');
         outputChannel.appendLine(optimizedCode);
-        outputChannel.show();
+        //outputChannel.show();
 
         return optimizedCode;
     } catch (error) {
         outputChannel.appendLine('\n\nError calling backend API for optimizing code:');
         outputChannel.appendLine(error.message);
-        outputChannel.show();
+        //outputChannel.show();
 
         // throw new Error('Error optimizing code: ' + error.message);
-        return '============= Mock response optimizing code ============';
+        return error.message;
     }
 }
 
@@ -218,7 +238,7 @@ async function callBackendApiForCodeOptimization(codeToOptimize) {
 async function callBackendApiForCodeDocumentation(selectedText) {
     outputChannel.appendLine('\n\nCode Documentation Request:');
     outputChannel.appendLine(selectedText);
-    outputChannel.show();
+    //outputChannel.show();
 
     const backendApiEndpoint = 'https://cobolsenseapplication.azurewebsites.net/api/cobol-documentation';
 
@@ -228,7 +248,7 @@ async function callBackendApiForCodeDocumentation(selectedText) {
 
         outputChannel.appendLine('\n\nAPI Response for Code Documentation:');
         outputChannel.appendLine(apiResponse);
-        outputChannel.show();
+        //outputChannel.show();
 
         const contentMatches = apiResponse.match(/content=([\s\S]+?)(?=(, name=null, functionCall=null|$))/g);
         const finalContent = contentMatches ? contentMatches.map(match => match.replace('content=', '').trim()).join('\n') : 'No code found';
@@ -238,10 +258,10 @@ async function callBackendApiForCodeDocumentation(selectedText) {
     } catch (error) {
         outputChannel.appendLine('\n\nError calling backend API for documentation:');
         outputChannel.appendLine(error.message);
-        outputChannel.show();
+        //outputChannel.show();
 
         // throw new Error('Error calling backend API: ' + error.message);
-        return '============= Mock response documentation ============';
+        return error.message;
     }
 }
 
