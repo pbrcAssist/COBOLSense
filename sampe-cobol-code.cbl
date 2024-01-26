@@ -1,83 +1,3 @@
- ****************************************************************
-      *  This program demonstrates the following Language            *
-      *  Environment callable                                        *
-      *  services : CEEMOUT, CEELOCT, CEEDATE                        *
-      ****************************************************************
-      ****************************************************************
-      **           I D          D I V I S I O N                    ***
-      ****************************************************************
-       Identification Division.
-       Program-id.    AWIXMP.
-      ****************************************************************
-      **           D A T A      D I V I S I O N                    ***
-      ****************************************************************
-       Data Division.
-       Working-Storage Section.
-      ****************************************************************
-      **  Declarations for the local date/time service.
-      ****************************************************************
-       01   Feedback.
-       COPY CEEIGZCT
-        02   Fb-severity      PIC 9(4) Binary.
-        02   Fb-detail        PIC X(10).
-       77   Dest-output       PIC S9(9) Binary.
-       77   Lildate           PIC S9(9) Binary.
-       77   Lilsecs           COMP-2.
-       77   Greg              PIC X(17).
-      ****************************************************************
-      **  Declarations for messages and pattern for date formatting.
-      ****************************************************************
-       01   Pattern.
-        02                    PIC 9(4) Binary Value 45.
-        02                    PIC X(45) Value
-            "Today is Wwwwwwwwwwwwz, Mmmmmmmmmmz ZD, YYYY.".
-
-       77   Start-Msg         PIC X(80) Value
-            "Callable Service example starting.".
-
-       77   Ending-Msg        PIC X(80) Value
-            "Callable Service example ending.".
-
-       01 Msg.
-         02 Stringlen         PIC S9(4) Binary.
-         02 Str               .
-          03                  PIC X Occurs 1 to 80 times
-                                     Depending on Stringlen. 
-      ****************************************************************
-      **           P R O C      D I V I S I O N                    ***
-      ****************************************************************
-       Procedure Division.
-       000-Main-Logic.
-           Perform 100-Say-Hello.
-           Perform 200-Get-Date.
-           Perform 300-Say-Goodbye.
-           Stop Run.
-      **
-      ** Setup initial values and say we are starting.
-      **
-       100-Say-Hello.
-           Move 80 to Stringlen.
-           Move 02 to Dest-output.
-           Move Start-Msg to Str.
-           CALL "CEEMOUT" Using Msg   Dest-output Feedback.
-           Move Spaces to Str.        CALL "CEEMOUT" Using Msg Dest-output Feedback.
-      **
-      ** Get the local date and time and display it.
-      **
-       200-Get-Date.
-           CALL "CEELOCT" Using Lildate Lilsecs     Greg      Feedback.
-           CALL "CEEDATE" Using Lildate Pattern     Str       Feedback.
-           CALL "CEEMOUT" Using Msg     Dest-output Feedback.
-           Move Spaces to Str.
-           CALL "CEEMOUT" Using Msg     Dest-output Feedback.
-      **
-      ** Say Goodbye.
-      **
-       300-Say-Goodbye.
-           Move Ending-Msg to Str.
-           CALL "CEEMOUT" Using Msg     Dest-output Feedback.
-       End program AWIXMP.
-//Optimize
 IDENTIFICATION DIVISION.
 PROGRAM-ID. FACTORIAL.
 DATA DIVISION.
@@ -91,20 +11,23 @@ PERFORM CALCULATE-FACTORIAL UNTIL NUMBER = 0.
     STOP RUN.
 CALCULATE-FACTORIAL.
     MULTIPLY FACTORIAL BY NUMBER.
-    SUBTRACT 1 FROM NUMBER.
+    SUBTRACT 1 FROM N
+    
+    ChatCompletionChoice(index=0, message=ChatMessage(role=assistant, content=Sure, here's a sample COBOL code for you:
 
-/// ORIGINAL
 IDENTIFICATION DIVISION.
-PROGRAM-ID. FACTORIAL.
+PROGRAM-ID. SAMPLE-COBOL-CODE.
 DATA DIVISION.
 WORKING-STORAGE SECTION.
-01 NUMBER PIC 9(2) VALUE 5.
-01 FACTORIAL PIC 9(10) VALUE 1.
+01 NAME PIC X(30) VALUE 'JOHN DOBSON'.
+01 AGE PIC 99 VALUE 30.
+01 SALARY PIC 9(7)V99 VALUE 5000.50.
 PROCEDURE DIVISION.
-MAIN-LOGIC.
-PERFORM CALCULATE-FACTORIAL UNTIL NUMBER = 0.
-    DISPLAY "Factorial of " NUMBER " is " FACTORIAL.
-    STOP RUN.
-CALCULATE-FACTORIAL.
-    MULTIPLY FACTORIAL BY NUMBER.
-    SUBTRACT 1 FROM NUMBER.
+DISPLAY 'Name: ' NAME.
+DISPLAY 'Age: ' AGE.
+DISPLAY 'Salary: ' SALARY.
+STOP RUN.
+
+This code declares three variables - NAME, AGE, and SALARY, and initializes them with values. It then displays the values of these variables using the DISPLAY statement. Finally, it stops the program execution with the STOP RUN statement., name=null, functionCall=null), finishReason=stop)
+    
+    UMBER.Hello, {"prompt":"test"}

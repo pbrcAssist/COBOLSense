@@ -2,7 +2,7 @@
     "name": "cobol-sense",
     "displayName": "Cobol Sense",
     "description": "GPT Assistant for COBOL",
-    "version": "0.0.2",
+    "version": "0.0.6",
     "engines": {
         "vscode": "^1.84.0"
     },

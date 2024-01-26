@@ -33,6 +33,11 @@ function activate(context) {
                     return;
                 }
 
+                if (apiResponse.includes('Request failed with status code 500')) {
+                    vscode.window.showErrorMessage('Error: Something went wrong, please try again.');
+                    return;
+                }
+
                 outputChannel.appendLine('\n\nAPI Response for Code Documentation:');
                 outputChannel.appendLine(apiResponse);
                 //outputChannel.show();
@@ -64,6 +69,11 @@ function activate(context) {
                 return;
             }
 
+            if (error.message.includes('Request failed with status code 500')) {
+                vscode.window.showErrorMessage('Error: Something went wrong, please try again.');
+                return;
+            }
+
             outputChannel.appendLine('\n\nError calling backend API for Code Documentation:');
             outputChannel.appendLine(error.message);
             //outputChannel.show();
@@ -74,23 +84,26 @@ function activate(context) {
 
     let optimizeCommand = vscode.commands.registerCommand('cobol-sense.optimizeCommand', async() => {
         try {
+            const editor = vscode.window.activeTextEditor;
+
+            if (!editor) {
+                throw new Error('No active text editor');
+            }
+
+            // Capture the initial selection position
+            const initialSelection = editor.selection;
+
+            const selectedText = editor.document.getText(initialSelection);
+
+            if (!selectedText) {
+                throw new Error('No text selected');
+            }
+
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: 'Optimizing code please wait...',
                 cancellable: true
             }, async(progress) => {
-                const editor = vscode.window.activeTextEditor;
-
-                if (!editor) {
-                    throw new Error('No active text editor');
-                }
-
-                const selectedText = editor.document.getText(editor.selection);
-
-                if (!selectedText) {
-                    throw new Error('No text selected');
-                }
-
                 const optimizedCode = await callBackendApiForCodeOptimization(selectedText);
 
                 if (optimizedCode.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
@@ -98,12 +111,18 @@ function activate(context) {
                     return;
                 }
 
+                if (optimizedCode.includes('Request failed with status code 500')) {
+                    vscode.window.showErrorMessage('Error: Something went wrong, please try again.');
+                    return;
+                }
+
                 outputChannel.appendLine('\n\nOptimized Code:');
                 outputChannel.appendLine(optimizedCode);
-                //outputChannel.show();
+                // outputChannel.show();
 
+                // Replace the initial selection with the optimized code
                 editor.edit((editBuilder) => {
-                    editBuilder.replace(editor.selection, optimizedCode);
+                    editBuilder.replace(initialSelection, optimizedCode);
                 });
 
                 vscode.window.showInformationMessage('Code optimization complete!');
@@ -114,37 +133,47 @@ function activate(context) {
                 return;
             }
 
+            if (error.message.includes('Request failed with status code 500')) {
+                vscode.window.showErrorMessage('Error: Something went wrong, please try again.');
+                return;
+            }
+
             outputChannel.appendLine('\n\nError optimizing code:');
             outputChannel.appendLine(error.message);
-            //outputChannel.show();
+            // outputChannel.show();
 
             vscode.window.showErrorMessage(`Error optimizing code: ${error.message}`);
         }
     });
 
+
     let generateCommand = vscode.commands.registerCommand('cobol-sense.generateCommand', async() => {
+        const editor = vscode.window.activeTextEditor;
+
+        if (!editor) {
+            vscode.window.showErrorMessage('No active text editor');
+            return;
+        }
+
+        const originalCursorPosition = editor.selection.active;
+
+        const userPrompt = await vscode.window.showInputBox({
+            prompt: 'Enter your code generation prompt:',
+            placeHolder: 'E.g., "Generate a function to calculate Fibonacci sequence"',
+            value: ''
+        });
+
+        if (userPrompt === undefined || userPrompt.trim() === '') {
+            // No prompt provided, return early
+            return;
+        }
+
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: 'Generating code please wait...',
                 cancellable: true
             }, async(progress) => {
-                const editor = vscode.window.activeTextEditor;
-
-                if (!editor) {
-                    throw new Error('No active text editor');
-                }
-
-                const userPrompt = await vscode.window.showInputBox({
-                    prompt: 'Enter your code generation prompt:',
-                    placeHolder: 'E.g., "Generate a function to calculate Fibonacci sequence"',
-                    value: ''
-                });
-
-                if (userPrompt === undefined) {
-                    return;
-                }
-
                 const generatedCode = await callBackendApiForCodeGeneration(userPrompt);
 
                 if (generatedCode.includes('getaddrinfo ENOTFOUND cobolsenseapplication.azurewebsites.net')) {
@@ -152,13 +181,16 @@ function activate(context) {
                     return;
                 }
 
+                if (generatedCode.includes('Request failed with status code 500')) {
+                    vscode.window.showErrorMessage('Error: Something went wrong, please try again.');
+                    return;
+                }
+
                 outputChannel.appendLine('\n\nGenerated Code:');
                 outputChannel.appendLine(generatedCode);
-                //outputChannel.show();
 
-                const currentPosition = editor.selection.active;
                 editor.edit((editBuilder) => {
-                    editBuilder.insert(currentPosition, generatedCode);
+                    editBuilder.insert(originalCursorPosition, generatedCode);
                 });
 
                 vscode.window.showInformationMessage('Generated code inserted at the cursor position.');
@@ -169,13 +201,19 @@ function activate(context) {
                 return;
             }
 
+            if (error.message.includes('Request failed with status code 500')) {
+                vscode.window.showErrorMessage('Error: Something went wrong, please try again.');
+                return;
+            }
+
             outputChannel.appendLine('\n\nError generating code:');
             outputChannel.appendLine(error.message);
-            //outputChannel.show();
 
             vscode.window.showErrorMessage(`Error generating code: ${error.message}`);
         }
     });
+
+
 
     context.subscriptions.push(documentCommand, optimizeCommand, generateCommand);
 }
@@ -189,7 +227,11 @@ async function callBackendApiForCodeGeneration(prompt) {
 
     return axios.post(backendApiEndpoint, { prompt })
         .then((response) => {
-            const generatedCode = response.data;
+            const apiResponse = response.data;
+
+            const contentMatches = apiResponse.match(/content=([\s\S]+?)(?=(, name=null, functionCall=null|$))/g);
+            const generatedCode = contentMatches ? contentMatches.map(match => match.replace('content=', '').trim()).join('\n') : 'No optimized code found';
+
             return generatedCode;
         })
         .catch((error) => {
